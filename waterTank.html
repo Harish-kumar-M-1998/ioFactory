@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Tank Problem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 50px;
+        }
+
+        .bar {
+            display: flex;
+            align-items: flex-end;
+            margin-top: 20px;
+
+            border-radius: 5px;
+
+            position: relative;
+            background-color: #e6f7ff;
+
+            padding: 0 5px;
+        }
+
+        .block {
+            width: 20px;
+            margin-right: 5px;
+            background-color: #0077ff;
+            transition: background-color 0.3s; border-radius: 5px;
+        }
+
+        .water {
+            background-color: lightblue;
+            border-radius: 5px ;
+            transition: height 0.3s ease;
+        }
+
+        .block,
+        .water {
+            border: 1px solid black;
+        }
+
+        .button {
+            margin: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: rgb(15, 53, 114);
+            border-radius: 20px;
+            background-color: aliceblue;
+            border: none;
+            padding: 10px 20px;
+            /* Added padding for better button size */
+            cursor: pointer;
+        }
+
+        #inputArray {
+            width: 50%;
+            padding: 10px;
+            border: 1px solid #007bff;
+
+            border-radius: 5px;
+
+            margin-top: 10px;
+
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+        }
+
+        #output {
+            margin-top: 20px;
+            color: #007bff;
+
+            font-weight: bold;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Water Trapped Visualization</h2>
+        <input type="text" id="inputArray" value="0,4,0,0,0,6,0,6,4,0">
+        <button class="button" onclick="calculateWater()">Calculate</button>
+        <h3 id="output">Output: </h3>
+        <div id="graph" class="bar"></div>
+    </div>
+
+    <script>
+        function calculateWater() {
+            const input = document.getElementById('inputArray').value;
+            const heights = input.split(',').map(Number);
+
+            const totalWater = trapWater(heights);
+            document.getElementById('output').innerText = `Output: ${totalWater} Units`;
+
+            drawGraph(heights, totalWater);
+        }
+
+        function trapWater(heights) {
+            let n = heights.length;
+            if (n === 0) return 0;
+
+            let leftMax = new Array(n).fill(0);
+            let rightMax = new Array(n).fill(0);
+            let water = 0;
+
+            // Fill leftMax array
+            leftMax[0] = heights[0];
+            for (let i = 1; i < n; i++) {
+                leftMax[i] = Math.max(leftMax[i - 1], heights[i]);
+            }
+
+            // Fill rightMax array
+            rightMax[n - 1] = heights[n - 1];
+            for (let i = n - 2; i >= 0; i--) {
+                rightMax[i] = Math.max(rightMax[i + 1], heights[i]);
+            }
+
+            // Calculate trapped water
+            for (let i = 0; i < n; i++) {
+                water += Math.min(leftMax[i], rightMax[i]) - heights[i];
+            }
+
+            return water;
+        }
+
+        function drawGraph(heights, totalWater) {
+            const graph = document.getElementById('graph');
+            graph.innerHTML = '';
+
+            const maxHeight = Math.max(...heights);
+
+            for (let i = 0; i < heights.length; i++) {
+                const blockHeight = heights[i];
+                const waterHeight = Math.min(leftMax(heights, i), rightMax(heights, i)) - blockHeight;
+
+                // Create block div
+                const blockDiv = document.createElement('div');
+                blockDiv.style.height = `${blockHeight * 10}px`;
+                blockDiv.classList.add('block');
+
+                // Create water div if applicable
+                if (waterHeight > 0) {
+                    const waterDiv = document.createElement('div');
+                    waterDiv.style.height = `${waterHeight * 10}px`;
+                    waterDiv.classList.add('water');
+                    blockDiv.appendChild(waterDiv);
+                }
+
+                graph.appendChild(blockDiv);
+            }
+        }
+
+        // Helper functions for max heights
+        function leftMax(heights, i) {
+            let max = 0;
+            for (let j = 0; j <= i; j++) {
+                max = Math.max(max, heights[j]);
+            }
+            return max;
+        }
+
+        function rightMax(heights, i) {
+            let max = 0;
+            for (let j = i; j < heights.length; j++) {
+                max = Math.max(max, heights[j]);
+            }
+            return max;
+        }
+    </script>
+</body>
+
+</html>
